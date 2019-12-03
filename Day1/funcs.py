@@ -44,6 +44,6 @@ if __name__ == "__main__":
     assert reduce(fuel_totalizer, [1,0]) == 1
     assert reduce(fuel_totalizer, [5,]) == 5
 
-    assert load_input("test_input.csv") == inputfilelist
+    assert load_input("inputFiles/test_input.csv") == inputfilelist
     
     assert list(map(fuel_calculator_recursive, testinput)) == testoutput2
