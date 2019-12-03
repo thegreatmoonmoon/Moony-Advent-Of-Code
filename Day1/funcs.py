@@ -5,14 +5,12 @@ def fuel_calculator(mass):
     """Function to return required fuel, takes mass as the only argument"""  
     return (floor(mass / 3) - 2)
 
-def fuel_calculator2(mass):
+def fuel_calculator_recursive(mass):
     """Recursive function to return required fuel, takes into account the mass of fuel itself"""  
-    endresult = 0
-    if (floor(mass / 3) - 2) < 0:
-        return endresult
+    if fuel_calculator(mass) < 0:
+        return 0
     else:
-        endresult += floor(mass / 3) - 2
-        return endresult + fuel_calculator2(floor(mass / 3) - 2)
+        return fuel_calculator(mass) + fuel_calculator_recursive(fuel_calculator(mass))
 
 def fuel_totalizer(*args):
     """Function to return the total of all arguments provided""" 
@@ -41,11 +39,11 @@ if __name__ == "__main__":
 
     #function tests
     assert list(map(fuel_calculator, testinput)) == testoutput
-    assert reduce(fuel_totalizer, testoutput) == testsum
+    assert reduce(fuel_totalizer, map(fuel_calculator, testinput)) == testsum
 
     assert reduce(fuel_totalizer, [1,0]) == 1
     assert reduce(fuel_totalizer, [5,]) == 5
 
     assert load_input("test_input.csv") == inputfilelist
     
-    assert list(map(fuel_calculator2, testinput)) == testoutput2
+    assert list(map(fuel_calculator_recursive, testinput)) == testoutput2
