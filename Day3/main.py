@@ -1,4 +1,3 @@
-from itertools import product
 import pprint
 import utilsfuncs
 
@@ -22,6 +21,7 @@ if __name__ == "__main__":
     wiregrid = dict()
     wirestamp = 0
     distances = []
+    steplist = []
 
     for wire in instructions:
         x = 0
@@ -65,9 +65,54 @@ if __name__ == "__main__":
                     except:
                         wiregrid[(x, y)] = [wirestamp]
 
+
     for crossing in get_key_list([1, 2], wiregrid):
         
         print(crossing)
+        steps = []
+
+        for wire in instructions:
+            counter = 0
+            x = 0
+            y = 0
+            
+
+            for instruction in wire:
+                if instruction[0] == 'R':
+                    for i in range(0, int(instruction[1:])):
+                        x += 1
+                        counter += 1
+                        if crossing == (x, y):
+                            break
+                elif instruction[0] == 'U':
+                    for i in range(0, int(instruction[1:])):
+                        y += 1
+                        counter += 1
+                        if crossing == (x, y):
+                            break
+                elif instruction[0] == 'L':
+                    for i in range(0, int(instruction[1:])):
+                        x -= 1
+                        counter += 1
+                        if crossing == (x, y):
+                            break
+                elif instruction[0] == 'D':
+                    for i in range(0, int(instruction[1:])):
+                        y -= 1
+                        counter += 1
+                        if crossing == (x, y):
+                            break
+                
+                if crossing == (x, y):
+                    
+                    steps.append(counter)
+                    print("Steps for a wire: {0}".format(counter))
+                    break
+
+                
+        steplist.append(sum(steps))
         distances.append(abs(crossing[0]) + abs(crossing[1]))
 
+    
     print(min(distances))
+    print(min(steplist))
