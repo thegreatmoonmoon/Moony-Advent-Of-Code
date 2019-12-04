@@ -32,7 +32,7 @@ class Intcode():
         return self._intcodeoutput.get_intcodeoutput()
 
 class Intcodeoutput():
-    """Intcode output class"""
+    """Intcode output observer / singleton class"""
     def __init__(self, intcode):
         self._intcode = intcode
 
