@@ -23,7 +23,7 @@ if __name__ == '__main__':
             if parsedopcode[0] == 1:
                 intcode.adder((intcode[item[0]+1], parsedopcode[1]),
                               (intcode[item[0]+2], parsedopcode[2]),
-                              (intcode[item[0]+3], parsedopcode[3]))
+                              (intcode[item[0]+3], 1))
             elif parsedopcode[0] == 2:
                 intcode.multiplier((intcode[item[0]+1], parsedopcode[1]),
                                    (intcode[item[0]+2], parsedopcode[2]),
@@ -32,6 +32,20 @@ if __name__ == '__main__':
                 intcode.take_input((intcode[item[0]+1]))
             elif parsedopcode[0] == 4:
                 intcode.take_output((intcode[item[0]+1], parsedopcode[1]),)
+            elif parsedopcode[0] == 5:
+                intcode.jump_if_true((intcode[item[0]+1], parsedopcode[1]),
+                                     (intcode[item[0]+2], parsedopcode[2]))
+            elif parsedopcode[0] == 6:
+                intcode.jump_if_false((intcode[item[0]+1], parsedopcode[1]),
+                                     (intcode[item[0]+2], parsedopcode[2]))
+            elif parsedopcode[0] == 7:
+                intcode.less_than((intcode[item[0]+1], parsedopcode[1]),
+                                   (intcode[item[0]+2], parsedopcode[2]),
+                                   (intcode[item[0]+3], parsedopcode[3]))
+            elif parsedopcode[0] == 8:
+                intcode.equal((intcode[item[0]+1], parsedopcode[1]),
+                                   (intcode[item[0]+2], parsedopcode[2]),
+                                   (intcode[item[0]+3], parsedopcode[3]))                                                
             elif parsedopcode[0] == 99:
                 break
             else:
