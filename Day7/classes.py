@@ -5,8 +5,8 @@ class Intcode():
     """Intcode class"""
     def __init__(self, intcode):
         """Opcode class constructor with enumerator"""
-        self._intcodeenumed = list(enumerate(intcode)) #intcode enumerated (position, value)
-        self._intcodeoutput = Intcodeoutput(intcode)
+        self._intcodeenumed = list(enumerate(list(intcode))) #intcode enumerated (position, value)
+        self._intcodeoutput = Intcodeoutput(list(intcode))
 
     def __iter__(self):
         """Returns Opcode custom iterator object"""
@@ -195,18 +195,20 @@ class IntcodeIterator():
 
 class Amplifier():
     """Amplifier class"""
-    def __init__(self, name, intcode, params):
+    def __init__(self, name, intcode):
         self.name = name
         self.intcode = Intcode(intcode)
-        self.params = params
+        self.params = []
         self.output = None
 
-    def run_program(self):
+    def run_program(self, params):
+        """Main coroutine generator for the Amplifier class. Takes params at the initialization which are consumed by input opcode 3. 
+        Further, params to be modified via the .send() method. Yields output value (at opcode 4)."""
         opcodeparsing = (Intcode.get_opcode, 
                     Intcode.get_param1, 
                     Intcode.get_param2, 
                     Intcode.get_param3)
-
+        self.params = params
         try:
             for item in iter(self.intcode):
 
@@ -221,9 +223,12 @@ class Amplifier():
                                        (self.intcode[item[0]+2], parsedopcode[2]),
                                        (self.intcode[item[0]+3], parsedopcode[3]))
                 elif parsedopcode[0] == 3:
+                    print("taking input ", self.params, " by ", self.name)
                     self.intcode.take_input((self.intcode[item[0]+1]), self.params.pop())
                 elif parsedopcode[0] == 4:
                     self.output = self.intcode.take_output((self.intcode[item[0]+1], parsedopcode[1]),)
+                    print("giving output: ", self.output, " by ", self.name)
+                    self.params = yield self.output
                 elif parsedopcode[0] == 5:
                     self.intcode.jump_if_true((self.intcode[item[0]+1], parsedopcode[1]),
                                          (self.intcode[item[0]+2], parsedopcode[2]))
@@ -245,39 +250,74 @@ class Amplifier():
                     raise ValueError
         except IndexError:
             print("Something's rather wrong...")
+        return None
 
     def get_output(self):
         return self.output
 
+def main(inputA: int = 0, inputs: list = [9, 8, 7, 6, 5], program: tuple = (3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5)):
+    """Coordinates amplifier coroutines to create feedback loop A->B->C->D->E->A. Breakes the loop once one of the 
+    amplifiers raises StopIteration exception (at opcode 99) and returns the output value of the last amplifier.
+    - takes initial input for the first amplifier
+    - takes phase input parameters for all 5 amplifiers"""
+    
+    amplifierA = Amplifier("A", program)
+    amplifierB = Amplifier("B", program)
+    amplifierC = Amplifier("C", program)
+    amplifierD = Amplifier("D", program)
+    amplifierE = Amplifier("E", program)
+
+    runA = amplifierA.run_program([inputA, inputs[0]])
+    inputB = next(runA)
+    runB = amplifierB.run_program([inputB, inputs[1]])
+    inputC = next(runB)
+    runC = amplifierC.run_program([inputC, inputs[2]])
+    inputD = next(runC)
+    runD = amplifierD.run_program([inputD, inputs[3]])
+    inputE = next(runD)
+    runE = amplifierE.run_program([inputE, inputs[4]])
+    inputA = next(runE)
+
+
+    while inputA is not None:
+        
+        try:
+            inputB = runA.send([inputA])
+    
+            inputC = runB.send([inputB])
+
+            inputD = runC.send([inputC])
+
+            inputE = runD.send([inputD])
+
+            inputA = runE.send([inputE])
+        
+        except StopIteration:
+            print("StopIteration!")
+            break
+
+    return amplifierE.get_output()
+
+
 if __name__ == '__main__':
 
     #exampleprogram = [3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0]
-    exampleprogram = [3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0]
+    #exampleprogram = [3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0]
     #exampleprogram = [3,23,3,24,1002,24,10,24,1002,23,-1,23,101,5,23,23,1,24,23,23,4,23,99,0,0]
-
-    potentialinputs = list(itertools.permutations([0, 1, 2, 3, 4]))
+    #exampleprogram = (3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5)
+    exampleprogram = (3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,-5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10)
+    
+    potentialinputs = list(itertools.permutations([5, 6, 7, 8, 9]))
 
     maxresult = 0
-    for inputs in potentialinputs:
+    for inputs in potentialinputs:    
+    
+        lastamplifieroutput = main(inputA=0, inputs=inputs, program=exampleprogram)
+    
+        if lastamplifieroutput > maxresult:
+            maxresult = lastamplifieroutput
+            result = (lastamplifieroutput, inputs)
 
-        amplifierA = Amplifier("A", exampleprogram, [0, inputs[0]])
-        amplifierA.run_program()
-
-        amplifierB = Amplifier("B", exampleprogram, [amplifierA.get_output(), inputs[1]])
-        amplifierB.run_program()
-
-        amplifierC = Amplifier("C", exampleprogram, [amplifierB.get_output(), inputs[2]])
-        amplifierC.run_program()
-
-        amplifierD = Amplifier("D", exampleprogram, [amplifierC.get_output(), inputs[3]])
-        amplifierD.run_program()
-
-        amplifierE = Amplifier("E", exampleprogram, [amplifierD.get_output(), inputs[4]])
-        amplifierE.run_program()
-        finaloutput = amplifierE.get_output()
-        
-        if finaloutput > maxresult:
-            maxresult = finaloutput
-            result = (finaloutput, inputs)
-
+    
     print(result)
+    assert result == (18216, (9, 7, 8, 5, 6))
