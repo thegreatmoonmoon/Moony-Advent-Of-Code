@@ -21,7 +21,7 @@ def get_layer_with_fewest_zeroes(layersdata: list) -> list:
     return layersdata.__getitem__(zeroeslist.index(min(zeroeslist)))
 
 def group_pixels_from_all_layers(layersdata: list, layerwidth: int = 25, layerhight: int = 6) -> list:
-    """Flattens a multidimensional array so that points from each dimension that have the same position are stored in the output lists, in order"""
+    """Flattens a multidimensional array so that points from each dimension that have the same position are stored in the output nested lists, in order"""
     
     return [ 
                 [ imagelayer[i][j] for imagelayer in layersdata ] 
