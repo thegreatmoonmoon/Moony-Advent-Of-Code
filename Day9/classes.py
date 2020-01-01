@@ -1,29 +1,6 @@
-import functools
+import utilsfuncs
 import itertools
 
-
-def retrieve_params(f):
-    """Decorator to retrieve program command attributes, depending on their parameters (position:0, immediate:1, relative:2)"""
-    @functools.wraps(f)
-    def wrap(self, *args, **kwargs):
-        modifiedkwargs = {}
-        for kwarg in kwargs:
-            if kwarg in ('write'):
-                if kwargs[kwarg][1] in (0, 1):
-                    modifiedkwargs[kwarg] = kwargs[kwarg][0][1]
-                elif kwargs[kwarg][1] == 2:
-                    modifiedkwargs[kwarg] = self._relativebase.currentindex + kwargs[kwarg][0][1]
-            elif kwarg in ('firstread', 'secondread', 'write_output'):
-                if kwargs[kwarg][1] == 0:
-                    modifiedkwargs[kwarg] = self._intcodeoutput[kwargs[kwarg][0][1]]
-                elif kwargs[kwarg][1] == 1:
-                    modifiedkwargs[kwarg] = kwargs[kwarg][0][1]
-                elif kwargs[kwarg][1] == 2:
-                    modifiedkwargs[kwarg] = self._intcodeoutput[self._relativebase.currentindex + kwargs[kwarg][0][1]]
-            else:    
-                modifiedkwargs[kwarg] = kwargs[kwarg]
-        return f(self, *args, **modifiedkwargs)
-    return wrap
 
 class Intcode():
     """Intcode class"""
@@ -62,7 +39,7 @@ class Intcode():
         """Static method to retrieve the third parameter from intcode value. Returns tens thousends digit"""
         return int(number/10000)
     
-    @retrieve_params
+    @utilsfuncs.retrieve_params
     def adder(self, firstread, secondread, write):
         """Adds together numbers read from two positions and stores the result in a third position."""
         write_p = write
@@ -70,7 +47,7 @@ class Intcode():
 
         self._intcodeoutput.setter(write_p, write_v)
 
-    @retrieve_params
+    @utilsfuncs.retrieve_params
     def multiplier(self, firstread, secondread, write):
         """Multiplies the two inputs instead of adding them."""
         write_p = write
@@ -78,18 +55,18 @@ class Intcode():
 
         self._intcodeoutput.setter(write_p, write_v)
 
-    @retrieve_params
+    @utilsfuncs.retrieve_params
     def take_input(self, write, inputvalue):
         """Takes a single integer as input and saves it to the position given by its only parameter."""
         self._intcodeoutput.setter(write, inputvalue)
 
-    @retrieve_params
+    @utilsfuncs.retrieve_params
     def take_output(self, write_output):
         """Outputs the value of its only parameter."""
         
         return write_output
 
-    @retrieve_params
+    @utilsfuncs.retrieve_params
     def jump_if_true(self, firstread, secondread):
         """If the first parameter is non-zero, it sets the instruction pointer 
         to the value from the second parameter. Otherwise, it does nothing."""
@@ -98,7 +75,7 @@ class Intcode():
         else:
             self._intcodeiterator.manually_move_index(3)
 
-    @retrieve_params
+    @utilsfuncs.retrieve_params
     def jump_if_false(self, firstread, secondread):
         """If the first parameter is zero, it sets the instruction pointer 
         to the value from the second parameter. Otherwise, it does nothing."""
@@ -107,7 +84,7 @@ class Intcode():
         else:
             self._intcodeiterator.manually_move_index(3)
 
-    @retrieve_params
+    @utilsfuncs.retrieve_params
     def less_than(self, firstread, secondread, write):
         """if the first parameter is less than the second parameter, it stores 1
         in the position given by the third parameter. Otherwise, it stores 0."""
@@ -116,7 +93,7 @@ class Intcode():
         else:
             self._intcodeoutput.setter(write, 0)
 
-    @retrieve_params
+    @utilsfuncs.retrieve_params
     def equal(self, firstread, secondread, write):
         """if the first parameter is equal to the second parameter, it stores 1 
         in the position given by the third parameter. Otherwise, it stores 0"""
@@ -125,7 +102,7 @@ class Intcode():
         else:
             self._intcodeoutput.setter(write, 0)
 
-    @retrieve_params
+    @utilsfuncs.retrieve_params
     def adjust_relative_base(self, firstread):
         """adjusts the relative base by the value of its only parameter. The relative 
         base increases (or decreases, if the value is negative) by the value of the parameter."""
@@ -179,7 +156,7 @@ class Intcodeoutput():
     
 class IntcodeIterator():
     """Custom Intcode iterator object"""
-    def __init__(self, intcodeobj):
+    def __init__(self, intcodeobj) -> None:
         """IntcodeIterator constructor with reference to Intcode object"""
         self._intcodeobj = intcodeobj
         self._index = 0
@@ -203,37 +180,37 @@ class IntcodeIterator():
             return opcode
         raise StopIteration
 
-    def modify_index_pointer(self, newpointervalue):
+    def modify_index_pointer(self, newpointervalue: int) -> None:
         """Sets the iterator index to a new value"""
         self._index = newpointervalue
     
-    def manually_move_index(self, numberofplaces):
+    def manually_move_index(self, numberofplaces: int) -> None:
         """Moves the iterator index by specific number of places"""
         self._index = self._index + numberofplaces
 
 class RelativeBase():
     """Object to initialize, store, retrieve, and modify program's relative base point
     Uses property decorators for attribute retrieval and modification"""
-    def __init__(self):
+    def __init__(self) -> None:
         self._currentindex = 0
 
     @property
-    def currentindex(self):
+    def currentindex(self) -> int:
         return self._currentindex
 
     @currentindex.setter
-    def currentindex(self, offset):
+    def currentindex(self, offset) -> None:
         self._currentindex = self._currentindex + offset
 
 class Runtime():
     """Runtime class"""
-    def __init__(self, name, intcode):
+    def __init__(self, name: str, intcode: tuple) -> None:
         self.name = name
         self.intcode = Intcode(intcode)
         self.params = []
         self.output = None
 
-    def run_program(self, params):
+    def run_program(self, params: list) -> None:
         """Main coroutine generator for the Runtime class. Takes params at the initialization which are consumed by input opcode 3. 
         Further params to be modified via the .send() method. Yields output value (at opcode 4)."""
         opcodeparsing = (Intcode.get_opcode, #set a sequence of functions to be executed to retrieve opcode+params from intcode value
@@ -296,30 +273,29 @@ class Runtime():
             print("Something's rather wrong... Null pointer?")
         return None
 
-    def get_output(self):
+    def get_output(self) -> int:
         return self.output
-
-def main(program: tuple, inputA: int = 1, inputs: list = [9, 8, 7, 6, 5]):
-    """Starts the BOOST computer.
-    InputA default value equals 1 (Test Mode)"""
-    
-    boostruntime = Runtime("BOOST", program)
-    
-    boostruntimerun = boostruntime.run_program([inputA,])
-
-    while True:
-    
-        try:
-            next(boostruntimerun)
-    
-        except StopIteration:
-            print("StopIteration!")
-            break
-
-    return boostruntime.get_output()
 
 
 if __name__ == '__main__':
+
+    def main(program: tuple, inputA: int = 1, inputs: list = [9, 8, 7, 6, 5]):
+        """Starts the BOOST computer.
+        InputA default value equals 1 (Test Mode)"""
+    
+        boostruntime = Runtime("BOOST", program)
+    
+        boostruntimerun = boostruntime.run_program([inputA,])
+
+        while True:
+    
+            try:
+                next(boostruntimerun)
+            except StopIteration:
+                print("StopIteration!")
+                break
+
+        return boostruntime.get_output()
 
     #exampleprogram = (109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99)
     exampleprogram = (1102,34915192,34915192,7,4,7,99,0)
