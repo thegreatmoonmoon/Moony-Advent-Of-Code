@@ -1,6 +1,30 @@
 import functools
 import itertools
 
+
+def retrieve_params(f):
+    """Decorator to retrieve program command attributes, depending on their parameters (position:0, immediate:1, relative:2)"""
+    @functools.wraps(f)
+    def wrap(self, *args, **kwargs):
+        modifiedkwargs = {}
+        for kwarg in kwargs:
+            if kwarg in ('write'):
+                if kwargs[kwarg][1] in (0, 1):
+                    modifiedkwargs[kwarg] = kwargs[kwarg][0][1]
+                elif kwargs[kwarg][1] == 2:
+                    modifiedkwargs[kwarg] = self._relativebase.currentindex + kwargs[kwarg][0][1]
+            elif kwarg in ('firstread', 'secondread', 'write_output'):
+                if kwargs[kwarg][1] == 0:
+                    modifiedkwargs[kwarg] = self._intcodeoutput[kwargs[kwarg][0][1]]
+                elif kwargs[kwarg][1] == 1:
+                    modifiedkwargs[kwarg] = kwargs[kwarg][0][1]
+                elif kwargs[kwarg][1] == 2:
+                    modifiedkwargs[kwarg] = self._intcodeoutput[self._relativebase.currentindex + kwargs[kwarg][0][1]]
+            else:    
+                modifiedkwargs[kwarg] = kwargs[kwarg]
+        return f(self, *args, **modifiedkwargs)
+    return wrap
+
 class Intcode():
     """Intcode class"""
     def __init__(self, intcode):
@@ -8,205 +32,105 @@ class Intcode():
         self._intcodeenumed = list(enumerate(list(intcode))) #intcode enumerated (position, value)
         self._intcodeoutput = Intcodeoutput(list(intcode))
         self._relativebase = RelativeBase()
-
+        
     def __iter__(self):
-        """Returns Opcode custom iterator object"""
+        """Magic dunder method to return Opcode custom iterator object"""
         self._intcodeiterator = IntcodeIterator(self)
         return self._intcodeiterator
 
     def __getitem__(self, key):
+        """Magic dunder method to allow object indexing by key"""  
         return list(enumerate(self.get_intcode()))[key]
     
-    #staticmethods for opcode with parameters parsing
     @staticmethod
     def get_opcode(number):
+        """Static method to retrieve an opcode from intcode value. Returns two last digits"""
         return int(round((number/10) % 10 * 10))
 
     @staticmethod
     def get_param1(number):
+        """Static method to retrieve the first parameter from intcode value. Returns hundreds digit"""
         return int((number/100) % 10)
 
     @staticmethod
     def get_param2(number):
+        """Static method to retrieve the second parameter from intcode value. Returns thousends digit"""
         return int(number/1000) % 10
 
     @staticmethod
     def get_param3(number):
+        """Static method to retrieve the third parameter from intcode value. Returns tens thousends digit"""
         return int(number/10000)
-
+    
+    @retrieve_params
     def adder(self, firstread, secondread, write):
         """Adds together numbers read from two positions and stores the result in a third position."""
-        if write[1] in (0, 1):
-            write_p = write[0][1]
-        elif write[1] == 2:
-            write_p = self._relativebase.currentindex + write[0][1]
-            
-        if firstread[1] == 0:
-            firstread_v = self._intcodeoutput[firstread[0][1]]
-        elif firstread[1] == 1:
-            firstread_v = firstread[0][1]
-        elif firstread[1] == 2:
-            firstread_v = self._intcodeoutput[self._relativebase.currentindex + firstread[0][1]]
-        
-        if secondread[1] == 0:
-            secondread_v = self._intcodeoutput[secondread[0][1]]
-        elif secondread[1] == 1:
-            secondread_v = secondread[0][1]
-        elif secondread[1] == 2:
-            secondread_v = self._intcodeoutput[self._relativebase.currentindex + secondread[0][1]]
-        write_v = (firstread_v + secondread_v)
+        write_p = write
+        write_v = (firstread + secondread)
 
         self._intcodeoutput.setter(write_p, write_v)
 
+    @retrieve_params
     def multiplier(self, firstread, secondread, write):
         """Multiplies the two inputs instead of adding them."""
-        if write[1] in (0, 1):
-            write_p = write[0][1]
-        elif write[1] == 2:
-            write_p = self._relativebase.currentindex + write[0][1]
-            
-        if firstread[1] == 0:
-            firstread_v = self._intcodeoutput[firstread[0][1]]
-        elif firstread[1] == 1:
-            firstread_v = firstread[0][1]
-        elif firstread[1] == 2:
-            firstread_v = self._intcodeoutput[self._relativebase.currentindex + firstread[0][1]]
-        
-        if secondread[1] == 0:
-            secondread_v = self._intcodeoutput[secondread[0][1]]
-        elif secondread[1] == 1:
-            secondread_v = secondread[0][1]
-        elif secondread[1] == 2:
-            secondread_v = self._intcodeoutput[self._relativebase.currentindex + secondread[0][1]]
-        write_v = (firstread_v * secondread_v)
+        write_p = write
+        write_v = (firstread * secondread)
 
         self._intcodeoutput.setter(write_p, write_v)
 
+    @retrieve_params
     def take_input(self, write, inputvalue):
         """Takes a single integer as input and saves it to the position given by its only parameter."""
-        if write[1] in (0, 1):
-            self._intcodeoutput.setter(write[0][1], inputvalue)
-        elif write[1] == 2:
-            self._intcodeoutput.setter(self._relativebase.currentindex + write[0][1], inputvalue)
+        self._intcodeoutput.setter(write, inputvalue)
 
-    def take_output(self, write):
+    @retrieve_params
+    def take_output(self, write_output):
         """Outputs the value of its only parameter."""
-        if write[1] == 0:
-            return (self._intcodeoutput[write[0][1]])
-        elif write[1] == 1:
-            return (write[0][1])
-        elif write[1] == 2:
-            return (self._intcodeoutput[self._relativebase.currentindex + write[0][1]])
+        
+        return write_output
 
+    @retrieve_params
     def jump_if_true(self, firstread, secondread):
         """If the first parameter is non-zero, it sets the instruction pointer 
         to the value from the second parameter. Otherwise, it does nothing."""
-        if firstread[1] == 0:
-            firstread_v = self._intcodeoutput[firstread[0][1]]
-        elif firstread[1] == 1:
-            firstread_v = firstread[0][1]
-        elif firstread[1] == 2:
-            firstread_v = self._intcodeoutput[self._relativebase.currentindex + firstread[0][1]]
-        
-        if secondread[1] == 0:
-            secondread_v = self._intcodeoutput[secondread[0][1]]
-        elif secondread[1] == 1:
-            secondread_v = secondread[0][1]
-        elif secondread[1] == 2:
-            secondread_v = self._intcodeoutput[self._relativebase.currentindex + secondread[0][1]]
-            
-        if firstread_v != 0:
-            self._intcodeiterator.modify_index_pointer(secondread_v)
+        if firstread != 0:
+            self._intcodeiterator.modify_index_pointer(secondread)
         else:
             self._intcodeiterator.manually_move_index(3)
 
+    @retrieve_params
     def jump_if_false(self, firstread, secondread):
         """If the first parameter is zero, it sets the instruction pointer 
         to the value from the second parameter. Otherwise, it does nothing."""
-        if firstread[1] == 0:
-            firstread_v = self._intcodeoutput[firstread[0][1]]
-        elif firstread[1] == 1:
-            firstread_v = firstread[0][1]
-        elif firstread[1] == 2:
-            firstread_v = self._intcodeoutput[self._relativebase.currentindex + firstread[0][1]]
-        
-        if secondread[1] == 0:
-            secondread_v = self._intcodeoutput[secondread[0][1]]
-        elif secondread[1] == 1:
-            secondread_v = secondread[0][1]
-        elif secondread[1] == 2:
-            secondread_v = self._intcodeoutput[self._relativebase.currentindex + secondread[0][1]]
-        
-        if firstread_v == 0:
-            self._intcodeiterator.modify_index_pointer(secondread_v)
+        if firstread == 0:
+            self._intcodeiterator.modify_index_pointer(secondread)
         else:
             self._intcodeiterator.manually_move_index(3)
 
+    @retrieve_params
     def less_than(self, firstread, secondread, write):
         """if the first parameter is less than the second parameter, it stores 1
         in the position given by the third parameter. Otherwise, it stores 0."""
-        if write[1] in (0, 1):
-            write_p = write[0][1]
-        elif write[1] == 2:
-            write_p = self._relativebase.currentindex + write[0][1]
-            
-        if firstread[1] == 0:
-            firstread_v = self._intcodeoutput[firstread[0][1]]
-        elif firstread[1] == 1:
-            firstread_v = firstread[0][1]
-        elif firstread[1] == 2:
-            firstread_v = self._intcodeoutput[self._relativebase.currentindex + firstread[0][1]]
-        
-        if secondread[1] == 0:
-            secondread_v = self._intcodeoutput[secondread[0][1]]
-        elif secondread[1] == 1:
-            secondread_v = secondread[0][1]
-        elif secondread[1] == 2:
-            secondread_v = self._intcodeoutput[self._relativebase.currentindex + secondread[0][1]]
-
-        if firstread_v < secondread_v:
-            self._intcodeoutput.setter(write_p, 1)
+        if firstread < secondread:
+            self._intcodeoutput.setter(write, 1)
         else:
-            self._intcodeoutput.setter(write_p, 0)
+            self._intcodeoutput.setter(write, 0)
 
+    @retrieve_params
     def equal(self, firstread, secondread, write):
         """if the first parameter is equal to the second parameter, it stores 1 
         in the position given by the third parameter. Otherwise, it stores 0"""
-        if write[1] in (0, 1):
-            write_p = write[0][1]
-        elif write[1] == 2:
-            write_p = self._relativebase.currentindex + write[0][1]
-        
-        if firstread[1] == 0:
-            firstread_v = self._intcodeoutput[firstread[0][1]]
-        elif firstread[1] == 1:
-            firstread_v = firstread[0][1]
-        elif firstread[1] == 2:
-            firstread_v = self._intcodeoutput[self._relativebase.currentindex + firstread[0][1]]
-        
-        if secondread[1] == 0:
-            secondread_v = self._intcodeoutput[secondread[0][1]]
-        elif secondread[1] == 1:
-            secondread_v = secondread[0][1]
-        elif secondread[1] == 2:
-            secondread_v = self._intcodeoutput[self._relativebase.currentindex + secondread[0][1]]
-
-        if firstread_v == secondread_v:
-            self._intcodeoutput.setter(write_p, 1)
+        if firstread == secondread:
+            self._intcodeoutput.setter(write, 1)
         else:
-            self._intcodeoutput.setter(write_p, 0)
+            self._intcodeoutput.setter(write, 0)
 
+    @retrieve_params
     def adjust_relative_base(self, firstread):
         """adjusts the relative base by the value of its only parameter. The relative 
         base increases (or decreases, if the value is negative) by the value of the parameter."""
-
-        if firstread[1] == 0:
-            self._relativebase.currentindex = self._intcodeoutput[firstread[0][1]]
-        elif firstread[1] == 1:
-            self._relativebase.currentindex = firstread[0][1]
-        elif firstread[1] == 2:
-            self._relativebase.currentindex = self._intcodeoutput[self._relativebase.currentindex + firstread[0][1]]
-
+        self._relativebase.currentindex = firstread
+        
     def get_intcode(self):
         return self._intcodeoutput.get_intcodeoutput()
 
@@ -217,6 +141,9 @@ class Intcodeoutput():
         self._extendedmemorymodule = {}
 
     def __getitem__(self, key):
+        """Magic dunder method to get intcode output by key.
+        First, tries to get an item from 'memory' initially assigned to the program.
+        If the above fails, tries to access an item from 'extended memory', using onjeect's private method"""
         try:
             return self._intcode[key]
         except IndexError:
@@ -227,6 +154,9 @@ class Intcodeoutput():
                 return self._access_extended_memory(key)
 
     def setter(self, position, value):
+        """Method to set a value in the program's 'memory'. First, tries to set the value at a position
+        initially assign to the program.
+        If the above fails, assignes the value in the 'extended memory' data struct"""
         try:
             self._intcode[position] = value 
         except IndexError:
@@ -255,10 +185,12 @@ class IntcodeIterator():
         self._index = 0
     
     def __iter__(self):
+        """Magic dunder method to allow for iterating over the object"""
         return self
 
     def __next__(self):
-        """Returns the next value, depending on the instruction"""
+        """Magic dunder method to return the next iterator value, depending on the instruction.
+        Additionally, modifies the index by appropriate number, depending on the instruction"""
         currentintcode = list(enumerate(self._intcodeobj.get_intcode()))
         if self._index < (len(currentintcode)):
             opcode = currentintcode[self._index]
@@ -280,6 +212,8 @@ class IntcodeIterator():
         self._index = self._index + numberofplaces
 
 class RelativeBase():
+    """Object to initialize, store, retrieve, and modify program's relative base point
+    Uses property decorators for attribute retrieval and modification"""
     def __init__(self):
         self._currentindex = 0
 
@@ -301,8 +235,8 @@ class Runtime():
 
     def run_program(self, params):
         """Main coroutine generator for the Runtime class. Takes params at the initialization which are consumed by input opcode 3. 
-        Further, params to be modified via the .send() method. Yields output value (at opcode 4)."""
-        opcodeparsing = (Intcode.get_opcode, 
+        Further params to be modified via the .send() method. Yields output value (at opcode 4)."""
+        opcodeparsing = (Intcode.get_opcode, #set a sequence of functions to be executed to retrieve opcode+params from intcode value
                     Intcode.get_param1, 
                     Intcode.get_param2, 
                     Intcode.get_param3)
@@ -313,43 +247,53 @@ class Runtime():
                 parsedopcode = [f(item[1]) for f in opcodeparsing]
 
                 if parsedopcode[0] == 1:
-                    self.intcode.adder((self.intcode[item[0]+1], parsedopcode[1]),
-                                  (self.intcode[item[0]+2], parsedopcode[2]),
-                                  (self.intcode[item[0]+3], parsedopcode[3]))
+                    self.intcode.adder(
+                                  firstread=(self.intcode[item[0]+1], parsedopcode[1]),
+                                  secondread=(self.intcode[item[0]+2], parsedopcode[2]),
+                                  write=(self.intcode[item[0]+3], parsedopcode[3]))
                 elif parsedopcode[0] == 2:
-                    self.intcode.multiplier((self.intcode[item[0]+1], parsedopcode[1]),
-                                       (self.intcode[item[0]+2], parsedopcode[2]),
-                                       (self.intcode[item[0]+3], parsedopcode[3]))
+                    self.intcode.multiplier(
+                                  firstread=(self.intcode[item[0]+1], parsedopcode[1]),
+                                  secondread=(self.intcode[item[0]+2], parsedopcode[2]),
+                                  write=(self.intcode[item[0]+3], parsedopcode[3]))
                 elif parsedopcode[0] == 3:
                     print("taking input ", self.params, " by ", self.name)
-                    self.intcode.take_input((self.intcode[item[0]+1], parsedopcode[1]), self.params.pop())
+                    self.intcode.take_input(
+                                  write=(self.intcode[item[0]+1], parsedopcode[1]), 
+                                  inputvalue=self.params.pop())
                 elif parsedopcode[0] == 4:
-                    self.output = self.intcode.take_output((self.intcode[item[0]+1], parsedopcode[1]),)
+                    self.output = self.intcode.take_output(
+                                  write_output=(self.intcode[item[0]+1], parsedopcode[1]),)
                     print("giving output: ", self.output, " by ", self.name)
                     self.params = yield self.output
                 elif parsedopcode[0] == 5:
-                    self.intcode.jump_if_true((self.intcode[item[0]+1], parsedopcode[1]),
-                                         (self.intcode[item[0]+2], parsedopcode[2]))
+                    self.intcode.jump_if_true(
+                                  firstread=(self.intcode[item[0]+1], parsedopcode[1]),
+                                  secondread=(self.intcode[item[0]+2], parsedopcode[2]))
                 elif parsedopcode[0] == 6:
-                    self.intcode.jump_if_false((self.intcode[item[0]+1], parsedopcode[1]),
-                                         (self.intcode[item[0]+2], parsedopcode[2]))
+                    self.intcode.jump_if_false(
+                                  firstread=(self.intcode[item[0]+1], parsedopcode[1]),
+                                  secondread=(self.intcode[item[0]+2], parsedopcode[2]))
                 elif parsedopcode[0] == 7:
-                    self.intcode.less_than((self.intcode[item[0]+1], parsedopcode[1]),
-                                       (self.intcode[item[0]+2], parsedopcode[2]),
-                                       (self.intcode[item[0]+3], parsedopcode[3]))
+                    self.intcode.less_than(
+                                  firstread=(self.intcode[item[0]+1], parsedopcode[1]),
+                                  secondread=(self.intcode[item[0]+2], parsedopcode[2]),
+                                  write=(self.intcode[item[0]+3], parsedopcode[3]))
                 elif parsedopcode[0] == 8:
-                    self.intcode.equal((self.intcode[item[0]+1], parsedopcode[1]),
-                                       (self.intcode[item[0]+2], parsedopcode[2]),
-                                       (self.intcode[item[0]+3], parsedopcode[3]))
+                    self.intcode.equal(
+                                  firstread=(self.intcode[item[0]+1], parsedopcode[1]),
+                                  secondread=(self.intcode[item[0]+2], parsedopcode[2]),
+                                  write=(self.intcode[item[0]+3], parsedopcode[3]))
                 elif parsedopcode[0] == 9:
-                    self.intcode.adjust_relative_base((self.intcode[item[0]+1], parsedopcode[1]),)                                                
+                    self.intcode.adjust_relative_base(
+                                  firstread=(self.intcode[item[0]+1], parsedopcode[1]),)                                                
                 elif parsedopcode[0] == 99:
                     break
                 else:
                     print("Unexpected Opcode! {}".format(parsedopcode[0]))
                     raise ValueError
         except IndexError:
-            print("Something's rather wrong...")
+            print("Something's rather wrong... Null pointer?")
         return None
 
     def get_output(self):
@@ -378,12 +322,12 @@ def main(program: tuple, inputA: int = 1, inputs: list = [9, 8, 7, 6, 5]):
 if __name__ == '__main__':
 
     #exampleprogram = (109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99)
-    #exampleprogram = (1102,34915192,34915192,7,4,7,99,0)
-    exampleprogram = (104,1125899906842624,99)
+    exampleprogram = (1102,34915192,34915192,7,4,7,99,0)
+    #exampleprogram = (104,1125899906842624,99)
 
 
     lastprogramoutput = main(inputA=1, program=exampleprogram)
     
     print("Last program output: ", lastprogramoutput)
 
-    assert lastprogramoutput == (1125899906842624)
+    assert len(str(lastprogramoutput)) == 16
