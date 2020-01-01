@@ -1,0 +1,274 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Welcome to Complete_Intcode_Computer’s documentation! &#8212; Complete_Intcode_Computer 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-Complete_Intcode_Computer.main">
+<span id="welcome-to-complete-intcode-computer-s-documentation"></span><h1>Welcome to Complete_Intcode_Computer’s documentation!<a class="headerlink" href="#module-Complete_Intcode_Computer.main" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="main-py">
+<h2>main.py<a class="headerlink" href="#main-py" title="Permalink to this headline">¶</a></h2>
+<p>The core module of the Intcode Computer</p>
+<dl class="function">
+<dt id="Complete_Intcode_Computer.main.main">
+<code class="descclassname">Complete_Intcode_Computer.main.</code><code class="descname">main</code><span class="sig-paren">(</span><em>program: tuple, inputA: int = 1, inputs: list = [9, 8, 7, 6, 5]</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.main.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts the BOOST computer.
+InputA default value equals 1 (Test Mode).</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-Complete_Intcode_Computer.classes"></span><div class="section" id="classes-py">
+<h2>classes.py<a class="headerlink" href="#classes-py" title="Permalink to this headline">¶</a></h2>
+<p>Contains all class objects utilized by the Intcode Computer</p>
+<dl class="class">
+<dt id="Complete_Intcode_Computer.classes.Intcode">
+<em class="property">class </em><code class="descclassname">Complete_Intcode_Computer.classes.</code><code class="descname">Intcode</code><span class="sig-paren">(</span><em>intcode</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intcode class</p>
+<dl class="method">
+<dt id="Complete_Intcode_Computer.classes.Intcode.adder">
+<code class="descname">adder</code><span class="sig-paren">(</span><em>firstread</em>, <em>secondread</em>, <em>write</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcode.adder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds together numbers read from two positions and stores the result in a third position.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Complete_Intcode_Computer.classes.Intcode.adjust_relative_base">
+<code class="descname">adjust_relative_base</code><span class="sig-paren">(</span><em>firstread</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcode.adjust_relative_base" title="Permalink to this definition">¶</a></dt>
+<dd><p>adjusts the relative base by the value of its only parameter. The relative
+base increases (or decreases, if the value is negative) by the value of the parameter.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Complete_Intcode_Computer.classes.Intcode.equal">
+<code class="descname">equal</code><span class="sig-paren">(</span><em>firstread</em>, <em>secondread</em>, <em>write</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcode.equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>if the first parameter is equal to the second parameter, it stores 1
+in the position given by the third parameter. Otherwise, it stores 0</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="Complete_Intcode_Computer.classes.Intcode.get_opcode">
+<em class="property">static </em><code class="descname">get_opcode</code><span class="sig-paren">(</span><em>number</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcode.get_opcode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Static method to retrieve an opcode from intcode value. Returns two last digits</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="Complete_Intcode_Computer.classes.Intcode.get_param1">
+<em class="property">static </em><code class="descname">get_param1</code><span class="sig-paren">(</span><em>number</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcode.get_param1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Static method to retrieve the first parameter from intcode value. Returns hundreds digit</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="Complete_Intcode_Computer.classes.Intcode.get_param2">
+<em class="property">static </em><code class="descname">get_param2</code><span class="sig-paren">(</span><em>number</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcode.get_param2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Static method to retrieve the second parameter from intcode value. Returns thousends digit</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="Complete_Intcode_Computer.classes.Intcode.get_param3">
+<em class="property">static </em><code class="descname">get_param3</code><span class="sig-paren">(</span><em>number</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcode.get_param3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Static method to retrieve the third parameter from intcode value. Returns tens thousends digit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Complete_Intcode_Computer.classes.Intcode.jump_if_false">
+<code class="descname">jump_if_false</code><span class="sig-paren">(</span><em>firstread</em>, <em>secondread</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcode.jump_if_false" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the first parameter is zero, it sets the instruction pointer
+to the value from the second parameter. Otherwise, it does nothing.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Complete_Intcode_Computer.classes.Intcode.jump_if_true">
+<code class="descname">jump_if_true</code><span class="sig-paren">(</span><em>firstread</em>, <em>secondread</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcode.jump_if_true" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the first parameter is non-zero, it sets the instruction pointer
+to the value from the second parameter. Otherwise, it does nothing.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Complete_Intcode_Computer.classes.Intcode.less_than">
+<code class="descname">less_than</code><span class="sig-paren">(</span><em>firstread</em>, <em>secondread</em>, <em>write</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcode.less_than" title="Permalink to this definition">¶</a></dt>
+<dd><p>if the first parameter is less than the second parameter, it stores 1
+in the position given by the third parameter. Otherwise, it stores 0.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Complete_Intcode_Computer.classes.Intcode.multiplier">
+<code class="descname">multiplier</code><span class="sig-paren">(</span><em>firstread</em>, <em>secondread</em>, <em>write</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcode.multiplier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiplies the two inputs instead of adding them.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Complete_Intcode_Computer.classes.Intcode.take_input">
+<code class="descname">take_input</code><span class="sig-paren">(</span><em>write</em>, <em>inputvalue</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcode.take_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a single integer as input and saves it to the position given by its only parameter.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Complete_Intcode_Computer.classes.Intcode.take_output">
+<code class="descname">take_output</code><span class="sig-paren">(</span><em>write_output</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcode.take_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs the value of its only parameter.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Complete_Intcode_Computer.classes.IntcodeIterator">
+<em class="property">class </em><code class="descclassname">Complete_Intcode_Computer.classes.</code><code class="descname">IntcodeIterator</code><span class="sig-paren">(</span><em>intcodeobj</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.IntcodeIterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom Intcode iterator object</p>
+<dl class="method">
+<dt id="Complete_Intcode_Computer.classes.IntcodeIterator.manually_move_index">
+<code class="descname">manually_move_index</code><span class="sig-paren">(</span><em>numberofplaces: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#Complete_Intcode_Computer.classes.IntcodeIterator.manually_move_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the iterator index by specific number of places</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Complete_Intcode_Computer.classes.IntcodeIterator.modify_index_pointer">
+<code class="descname">modify_index_pointer</code><span class="sig-paren">(</span><em>newpointervalue: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#Complete_Intcode_Computer.classes.IntcodeIterator.modify_index_pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the iterator index to a new value</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Complete_Intcode_Computer.classes.Intcodeoutput">
+<em class="property">class </em><code class="descclassname">Complete_Intcode_Computer.classes.</code><code class="descname">Intcodeoutput</code><span class="sig-paren">(</span><em>intcode</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcodeoutput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intcode output observer class</p>
+<dl class="method">
+<dt id="Complete_Intcode_Computer.classes.Intcodeoutput.setter">
+<code class="descname">setter</code><span class="sig-paren">(</span><em>position</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Intcodeoutput.setter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to set a value in the program’s ‘memory’. First, tries to set the value at a position
+initially assign to the program.
+If the above fails, assignes the value in the ‘extended memory’ data struct</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Complete_Intcode_Computer.classes.RelativeBase">
+<em class="property">class </em><code class="descclassname">Complete_Intcode_Computer.classes.</code><code class="descname">RelativeBase</code><a class="headerlink" href="#Complete_Intcode_Computer.classes.RelativeBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object to initialize, store, retrieve, and modify program’s relative base point
+Uses property decorators for attribute retrieval and modification</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="Complete_Intcode_Computer.classes.Runtime">
+<em class="property">class </em><code class="descclassname">Complete_Intcode_Computer.classes.</code><code class="descname">Runtime</code><span class="sig-paren">(</span><em>name: str</em>, <em>intcode: tuple</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.classes.Runtime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runtime class</p>
+<dl class="method">
+<dt id="Complete_Intcode_Computer.classes.Runtime.run_program">
+<code class="descname">run_program</code><span class="sig-paren">(</span><em>params: list</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#Complete_Intcode_Computer.classes.Runtime.run_program" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main coroutine generator for the Runtime class. Takes params at the initialization which are consumed by input opcode 3.
+Further params to be modified via the .send() method. Yields output value (at opcode 4).</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-Complete_Intcode_Computer.utilsfuncs"></span><div class="section" id="utilsfuncs-py">
+<h2>utilsfuncs.py<a class="headerlink" href="#utilsfuncs-py" title="Permalink to this headline">¶</a></h2>
+<p>Contains utility functions utilized by the classes or the main module of the Intcode Computer</p>
+<dl class="function">
+<dt id="Complete_Intcode_Computer.utilsfuncs.load_input">
+<code class="descclassname">Complete_Intcode_Computer.utilsfuncs.</code><code class="descname">load_input</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.utilsfuncs.load_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to return a list of input variables from file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Complete_Intcode_Computer.utilsfuncs.retrieve_params">
+<code class="descclassname">Complete_Intcode_Computer.utilsfuncs.</code><code class="descname">retrieve_params</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#Complete_Intcode_Computer.utilsfuncs.retrieve_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator to retrieve program command attributes, depending on their parameters (position:0, immediate:1, relative:2)</p>
+</dd></dl>
+
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">Complete_Intcode_Computer</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Tomasz Drgas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

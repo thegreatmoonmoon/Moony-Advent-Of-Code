@@ -1,3 +1,9 @@
+"""
+utilsfuncs.py
+====================================
+Contains utility functions utilized by the classes or the main module of the Intcode Computer
+"""
+
 import functools
 
 def load_input(filepath):

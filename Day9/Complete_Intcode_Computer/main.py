@@ -1,11 +1,17 @@
-import classes
-import utilsfuncs
+"""
+main.py
+====================================
+The core module of the Intcode Computer
+"""
+
+from . import classes
+from . import utilsfuncs
 import itertools
 
 
 def main(program: tuple, inputA: int = 1, inputs: list = [9, 8, 7, 6, 5]):
     """Starts the BOOST computer.
-    InputA default value equals 1 (Test Mode)"""
+    InputA default value equals 1 (Test Mode)."""
     
     boostruntime = classes.Runtime("BOOST", program)
     
@@ -30,4 +36,3 @@ if __name__ == '__main__':
     lastprogramoutput = main(inputA=2, program=intcodetuple)
     
     print("Last program output: ", lastprogramoutput)
-  

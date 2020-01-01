@@ -1,4 +1,10 @@
-import utilsfuncs
+"""
+classes.py
+====================================
+Contains all class objects utilized by the Intcode Computer
+"""
+
+from . import utilsfuncs
 import itertools
 
 
