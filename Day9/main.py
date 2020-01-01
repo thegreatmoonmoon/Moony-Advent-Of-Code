@@ -27,7 +27,7 @@ if __name__ == '__main__':
     #load intcode from input file
     intcodetuple = tuple(map(int, utilsfuncs.load_input("inputFiles/inputfile.csv")))
 
-    lastprogramoutput = main(inputA=1, program=intcodetuple)
+    lastprogramoutput = main(inputA=2, program=intcodetuple)
     
     print("Last program output: ", lastprogramoutput)
   

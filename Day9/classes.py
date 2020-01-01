@@ -92,11 +92,11 @@ class Intcode():
     def take_output(self, write):
         """Outputs the value of its only parameter."""
         if write[1] == 0:
-            return (self._intcodeoutput.get_intcodeoutput()[write[0][1]])
+            return (self._intcodeoutput[write[0][1]])
         elif write[1] == 1:
             return (write[0][1])
         elif write[1] == 2:
-            return (self._intcodeoutput.get_intcodeoutput()[self._relativebase.currentindex + write[0][1]])
+            return (self._intcodeoutput[self._relativebase.currentindex + write[0][1]])
 
     def jump_if_true(self, firstread, secondread):
         """If the first parameter is non-zero, it sets the instruction pointer 
