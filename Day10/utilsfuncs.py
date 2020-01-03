@@ -5,6 +5,12 @@ The core utility module for the Asteroid Finder.
 """
 
 
+from math import atan2
+
+
+RADIAN_TO_DEGREES = 57.3
+
+
 def load_input(filepath):
     """Function to return a list matrix of input map from file"""
     inputlist = []
@@ -41,7 +47,9 @@ def diagonal_distance(p0: tuple, p1: tuple) -> int:
     return max((abs(p0[0] - p1[0]), abs(p0[1] - p1[1])))
 
 
-def line(p0: tuple, p1: tuple, includestartpoint: bool = False, roundline: bool = False) -> list:
+def line(
+    p0: tuple, p1: tuple, includestartpoint: bool = False, roundline: bool = False
+) -> list:
     """Returns a list of line coordinates that is interpolated between two points (tuples).
     Uses linear interpolation algorithm.
     Optionally can include starting point in the results (default=False).
@@ -69,3 +77,17 @@ def array_lookup(twodimarray: list, lookupvalue) -> list:
             coordinates.append((xi, yi)) if x == lookupvalue else None
 
     return coordinates
+
+
+def relative_coordinates(referalpoint: tuple, targetpoint: tuple) -> tuple:
+    """Calculates relative coordinates of a point in reference to the passed referal point.
+    Both points should be part of the same two dimensional array."""
+
+    return ((referalpoint[0] - targetpoint[0]) * -1, referalpoint[1] - targetpoint[1])
+
+
+def calculate_angle(x: int, y: int) -> float:
+    """Calculates an angle in degrees between the y-axis and the point(x, y).
+    Angle increases clockwise."""
+
+    return (atan2(x, y) * RADIAN_TO_DEGREES + 360) % 360
